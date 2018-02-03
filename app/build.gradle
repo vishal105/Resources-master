@@ -1,0 +1,62 @@
+apply plugin: 'com.android.application'
+apply from: "$project.rootDir/settings/dependencies.gradle"
+apply from: "$project.rootDir/settings/app.gradle"
+android {
+    compileSdkVersion COMPILE_SDK_VERSION
+    buildToolsVersion BUILD_TOOLS_VERSION
+    defaultConfig {
+        applicationId APPLICATION_ID
+        minSdkVersion MIN_SDK_VERSION
+        targetSdkVersion TARGET_SDK_VERSION
+
+        versionCode VERSION_CODE
+        versionName VERSION_NAME
+    }
+    buildTypes {
+        release {
+            minifyEnabled MINIFY_ENABLE
+            shrinkResources SHRINK_RESOURCES
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            def date = new Date()
+            def formattedDate = date.format('dd_MM_yy')
+            outputFileName = "${APK_NAME}-${variant.name}-${formattedDate}.apk"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':support')
+
+//    Support
+    supportDependencies.each {
+        implementation it.value
+    }
+
+//    Glide
+    implementation glideDependencies.glideLib
+    annotationProcessor glideDependencies.glideCompiler
+
+//    Retrofit
+    retrofitDependencies.each {
+        implementation it.value
+    }
+
+//    Google
+    implementation(googleDependencies.firebaseMessaging) {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+
+    otherDependencies.each {
+        implementation it.value
+    }
+}
+apply plugin: 'com.google.gms.google-services'
